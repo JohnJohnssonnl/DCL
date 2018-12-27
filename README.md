@@ -1,7 +1,7 @@
 # DCL
 Decentralized Cryptographic Ledger in .NET Core (cross platform).This is meant as sandbox, so only use it as such.
 What is it???
-Everyone tasks about Bitcoin etc. Well, most coins are directly forked of Bitcoin (for example BCash ;-)) / Cryptonote (for example Monero). Mostly building onto a foundation which is, in its high-level design in my opnion outdated. It generates blocks to secure the network and therewith rewarding miners of this pointless guessing game with a reward.  
+Everyone tasks about Bitcoin etc. Well, most coins are directly forked of Bitcoin (for example Litecoin) / Cryptonote (for example Monero). Mostly building onto a foundation which is, in its high-level design in my opinion outdated. It generates blocks to secure the network and therewith rewarding miners of this pointless guessing game with a reward.  
 This imposes 3 problems:
 - Enormous (useless) power consumption
 - Low max TX per second speed (or your blockchain size will grow enormously if you would have, for example, 10000 px per sec.)
