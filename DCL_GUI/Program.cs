@@ -8,7 +8,7 @@ namespace DCL_GUI
     {
         static void Main(string[] args)
         {
-            BuildAvaloniaApp().Start<MainWindow>();
+            BuildAvaloniaApp().Start<MainMenu>();
         }
 
         public static AppBuilder BuildAvaloniaApp()

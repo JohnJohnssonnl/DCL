@@ -1,5 +1,5 @@
 ﻿<Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="DCL_GUI">
-    <Button Background="Blue">Hello World!</Button>
+    <Button Background="Blue">Hello Fellow Coder!</Button>
 </Window>

@@ -4,9 +4,9 @@ using Avalonia.Markup.Xaml;
 
 namespace DCL_GUI
 {
-    public class MainWindow : Window
+    public class MainMenu : Window
     {
-        public MainWindow()
+        public MainMenu()
         {
             InitializeComponent();
 #if DEBUG
