@@ -19,11 +19,6 @@ namespace DCL_Core.Contracts
         public byte[] NetworkByte { get; set; }
         [DataMember]
         public byte[] HashedKey { get; set; }
-        [DataMember]
-        public string PublicAddress { get; set; }
-        [DataMember]
-        public byte[] PassCode { get; set; }
-        [DataMember]
-        public string WalletName { get; set; }
+        
     }
 }
