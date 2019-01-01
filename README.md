@@ -1,4 +1,6 @@
 # DCL
+Travis link: https://www.travis-ci.org/JohnJohnssonnl/DCL<BR>
+Travis Build status:   ![alt text](https://www.travis-ci.org/JohnJohnssonnl/DCL.svg?branch=master)<BR><BR>
 Decentralized Cryptographic Ledger in .NET Core (cross platform).This is meant as sandbox, so only use it as such.
 What is it???
 Everyone tasks about Bitcoin etc. Well, most coins are directly forked of Bitcoin (for example Litecoin) / Cryptonote (for example Monero). Mostly building onto a foundation which is, in its high-level design in my opinion outdated. It generates blocks to secure the network and therewith rewarding miners of this pointless guessing game with a reward.  
