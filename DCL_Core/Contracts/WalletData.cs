@@ -15,5 +15,7 @@ namespace DCL_Core.Contracts
         public byte[]   PassCode { get; set; }
         [DataMember]
         public string   WalletName { get; set; }
+        [DataMember]
+        public double   Balance { get; set; }
     }
 }

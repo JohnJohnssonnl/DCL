@@ -2,11 +2,26 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Decentralized Cryptographic Ledger (Alpha)">
   <StackPanel Width="1000" HorizontalAlignment="Left" Name="MainMenu">
-    <TextBlock Margin="10" FontSize="20">Decentralized Cryptographic Ledger</TextBlock>
-    <Button Margin="10" Background="Lightblue" Name="LoginButton">Login</Button>
-    <Button Margin="10">Settings</Button>
-    <Button Margin="10">Transactions</Button>
-    <Button Margin="10">Transfer shares</Button>
-    <Button Margin="10">About</Button>
+    <TextBlock FontSize="40" HorizontalAlignment="Center" Foreground="#FF00FF" Name="WelcomeBack"></TextBlock>
+    <TextBlock FontSize="40" HorizontalAlignment="Center" Foreground="LightGray" Name="HelloMessage">Hello you! Let's start by logging in to a wallet</TextBlock>
+    <TextBlock FontSize="20" HorizontalAlignment="Center" Name="WalletNameLabel">Wallet name</TextBlock>
+    <TextBox FontSize="15" HorizontalAlignment="Center" Width="400" Name="WalletNameValue"></TextBox>
+    <TextBlock FontSize="20" HorizontalAlignment="Center" Name="PassWordLabel">Password</TextBlock>
+    <TextBox FontSize="15" HorizontalAlignment="Center" Width="400" Name="PasswordValue"></TextBox>
+    <CheckBox FontSize="20" HorizontalAlignment="Center" Name="CreateNewWalletValue">Create new wallet</CheckBox>
+    <Button Margin="10" FontSize="20" BorderThickness="0" Foreground ="white" Background="#555555" Name="LoginButton">Login</Button>
+    <TextBlock FontSize="20" HorizontalAlignment="Center" Name="BalanceLabel">Balance</TextBlock>
+    <TextBlock FontSize="15" Foreground="#555555" HorizontalAlignment="Center" Name="Balance"></TextBlock>
+    <TextBlock FontSize="20" HorizontalAlignment="Center" Name="PublicAddressLabel">Public address</TextBlock>
+    <TextBlock FontSize="15" Foreground="#555555" HorizontalAlignment="Center" Name="PublicAddress"></TextBlock>
+    <Image  Name="QRCode"></Image>
+    <Button Margin="10" FontSize="20" BorderThickness="0" Foreground ="white" Background="#555555" Name="LogoutButton">Logout</Button>
+    <Button Margin="10" FontSize="20" BorderThickness="0" Foreground ="white" Background="#555555" Name="SettingsButton">Settings</Button>
+    <TextBlock FontSize="20" HorizontalAlignment="Center" Name="P2PServerPortLabel">P2P Server port</TextBlock>
+    <TextBox FontSize="15" HorizontalAlignment="Center" Name="P2PServerPort">1000</TextBox>
+    <Button Margin="10" FontSize="20" BorderThickness="0" Foreground ="white" Background="#555555" Name="TransactionsButton">Transactions</Button>
+    <Button Margin="10" FontSize="20" BorderThickness="0" Foreground ="white" Background="#555555" Name="TransferSharesButton">Transfer shares</Button>
+    <Button Margin="10" FontSize="20" BorderThickness="0" Foreground ="white" Background="#555555" Name="AboutButton">About</Button>
+    <TextBlock FontSize="15" Foreground="#555555" HorizontalAlignment="Center" Name="AboutText">DCL Decentralized Crytographic Ledger Wallet. Developed by John Johnssonnl</TextBlock>
   </StackPanel>
 </Window>

@@ -15,7 +15,6 @@ namespace DCL_Core.CORE
         public CompletedTransaction CompletedTrans;
         public P2PClient            P2PClient { get; set; }
         public P2PServer            P2PServer { get; set; }
-        Int32                       Port;
 
         public DaemonCore New()
         {

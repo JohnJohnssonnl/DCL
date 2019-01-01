@@ -24,32 +24,69 @@ namespace DCL_Core.Wallet
 {
     public class WalletManager
     {
-        public WalletData Login(LoginRequest    _loginRequest)
+        //Make sure the Data can not be read directly as public member
+        private WalletData  Data   { get; set; }
+
+        public bool isLoggedIn()
+        {
+            return Data == null?false:true;
+        }
+        public String PublicAddress()
+        {
+            return Data.PublicAddress;
+        }
+        public Double Balance()
+        {
+            return Data.Balance;
+        }
+        public void LogOut()
+        {
+            //Only do something if we're actually logged in
+            if(Data != null)
+            {
+                WriteWalletData(Data, Data.WalletName);
+                Data = null;    //Remove data
+            }
+        }
+
+        public bool Login(LoginRequest    _loginRequest)
         {
             WalletData ret = null;
 
             if( _loginRequest.CreateNewWallet               && 
                 _loginRequest.PassCode          != ""       && 
-                _loginRequest.WalletName        != "")
+                _loginRequest.WalletName        != ""       &&
+                !FileBinIO.Exists(_loginRequest.WalletName))
             {
                 ret =  GenerateWallet(_loginRequest.PassCode, _loginRequest.WalletName);
             }
             else if(_loginRequest.CreateNewWallet)
             {
-                Console.WriteLine("Missing wallet name or password, or password requirements do not match");
-                return null;    //Todo: add exception error
+                Console.WriteLine("Missing wallet name or password, or password requirements do not match, or wallet already exists");
+                return false;    //Todo: add exception error
             }
             else
             {
                 ret = LoginWallet(_loginRequest);
             }
 
-            return ret;
+            Data = ret;
+
+            return Data == null?false:true;
         }
 
         private WalletData  LoginWallet(LoginRequest    _loginRequest)
         {
-            WalletData ret = ReadBlobToWalletData(_loginRequest.WalletName);
+            WalletData ret;
+
+            try
+            {
+                ret = ReadBlobToWalletData(_loginRequest.WalletName);
+            }
+            catch
+            {
+                return null;    //Ignore for now
+            }
 
             if (ret == null)
                 return null;
@@ -90,7 +127,7 @@ namespace DCL_Core.Wallet
         {
             //Read from bin
             //TODO: Move deserialization to FileBinIO to avoid duplicating code on multiple objects
-            byte[] BlobData = FileBinIO.ReadBin(AppDomain.CurrentDomain.BaseDirectory + @"bin\\WalletData\\" + _walletName + ".bin");
+            byte[] BlobData = FileBinIO.ReadBin(_walletName);
 
             MemoryStream memorystreamd = new MemoryStream(BlobData);
             BinaryFormatter bfd = new BinaryFormatter();
@@ -110,8 +147,7 @@ namespace DCL_Core.Wallet
             WalletKeys.PrivateViewKey   = GeneratePrivateViewKey(_passCode, WalletKeys.PrivateSpendKey);                                //Done
             WalletKeys.PublicSpendKey   = GeneratePubSpendKey(WalletKeys.PrivateSpendKey);                                              //Done
             WalletKeys.PublicViewKey    = GeneratePubViewKey(WalletKeys.PrivateViewKey);                                                //Done
-            WalletKeys.NetworkByte      = StringToByteArray("B");                                                                       //Done
-            WalletKeys.HashedKey        = HashKeccak256(WalletKeys.PublicSpendKey, WalletKeys.PublicViewKey, WalletKeys.NetworkByte);   //Done
+            WalletKeys.HashedKey        = HashKeccak256(WalletKeys.PublicSpendKey, WalletKeys.PublicViewKey);                           //Done
 
             newWallet.PublicAddress     = ConvertToPubAddressChunked(WalletKeys.HashedKey);                                             //Done
             newWallet.PassCode          = PasswordManager.GenerateSaltedOutputBytes(_passCode);
@@ -144,35 +180,34 @@ namespace DCL_Core.Wallet
         }
         public static byte[] GeneratePubSpendKey(byte[] privateSpendKey)
         {
-            RNGCryptoServiceProvider.Create().GetBytes(privateSpendKey);
+            //RNGCryptoServiceProvider.Create().GetBytes(privateSpendKey);
             byte[] publicKey = Ed25519.PublicKey(privateSpendKey);
 
             return publicKey;
         }
         public static byte[] GeneratePubViewKey(byte[] privateViewKey)
         {
-            RNGCryptoServiceProvider.Create().GetBytes(privateViewKey);
+            //RNGCryptoServiceProvider.Create().GetBytes(privateViewKey);
             byte[] publicKey = Ed25519.PublicKey(privateViewKey);
 
             return publicKey;
         }
 
-        public static byte[] HashKeccak256(byte[] publicSpendKey, byte[] publicViewKey, byte[] networkByte)
+        public static byte[] HashKeccak256(byte[] publicSpendKey, byte[] publicViewKey)
         {
             //We need 69 bytes: 65 from the public spend key, public view key and networkbyte + 4 from the hashing of keccak
-            byte[] origByteSet = new byte[67];  //Monero is 65, but we have 67 for SHC due to its hex network byte structure
+            byte[] origByteSet = new byte[66];
             byte[] hashFirst4 = new byte[4];
-            byte[] ret = new byte[71];
-            System.Buffer.BlockCopy(networkByte, 0, origByteSet, 0, networkByte.Length);
-            System.Buffer.BlockCopy(publicSpendKey, 0, origByteSet, networkByte.Length, publicSpendKey.Length);
-            System.Buffer.BlockCopy(publicViewKey, 0, origByteSet, networkByte.Length + publicSpendKey.Length, publicViewKey.Length);
+            byte[] ret = new byte[70];
+            System.Buffer.BlockCopy(publicSpendKey, 0, origByteSet, 0, publicSpendKey.Length);
+            System.Buffer.BlockCopy(publicViewKey, 0, origByteSet, publicSpendKey.Length, publicViewKey.Length);
 
             byte[] resultHashedKec256 = WalletManager.Keccak256Helper(origByteSet);    //Run keccak
 
             Array.Copy(resultHashedKec256, 0, hashFirst4, 0, 4); //Copy the first 4 bytes from the hash
 
             System.Buffer.BlockCopy(origByteSet, 0, ret, 0, origByteSet.Length);  //Add the 4 bytes to complete the 69 bytes array
-            System.Buffer.BlockCopy(hashFirst4, 0, ret, publicSpendKey.Length + publicViewKey.Length + networkByte.Length, hashFirst4.Length);  //Add the 4 bytes to complete the 69 bytes array
+            System.Buffer.BlockCopy(hashFirst4, 0, ret, publicSpendKey.Length + publicViewKey.Length, hashFirst4.Length);  //Add the 4 bytes to complete the 69 bytes array
 
             return ret; //Return the hashed array
         }

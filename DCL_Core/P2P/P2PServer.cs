@@ -10,7 +10,6 @@ namespace DCL_Core.P2P
 {
     public class P2PServer : WebSocketBehavior
     {
-        bool                chainSynched    = false;
         WebSocketServer     wss             = null;
         IList<string>       DiscoveredPeerList;
 

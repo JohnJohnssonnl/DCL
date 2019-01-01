@@ -40,5 +40,12 @@ namespace DCL_Core.Wallet
 
             return bytes;
         }
+        public static Boolean Exists(String _fileName)
+        {
+            String FileFolder = AppDomain.CurrentDomain.BaseDirectory + @"bin\\WalletData\\";
+            String FilePath = FileFolder + _fileName + ".bin";
+
+            return File.Exists(FilePath);
+        }
     }
 }
