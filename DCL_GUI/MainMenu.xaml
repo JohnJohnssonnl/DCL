@@ -1,5 +1,12 @@
 ﻿<Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="DCL_GUI">
-    <Button Background="Blue">Hello Fellow Coder!</Button>
+        Title="Decentralized Cryptographic Ledger (Alpha)">
+  <StackPanel Width="1000" HorizontalAlignment="Left" Name="MainMenu">
+    <TextBlock Margin="10" FontSize="20">Decentralized Cryptographic Ledger</TextBlock>
+    <Button Margin="10" Background="Lightblue" Name="LoginButton">Login</Button>
+    <Button Margin="10">Settings</Button>
+    <Button Margin="10">Transactions</Button>
+    <Button Margin="10">Transfer shares</Button>
+    <Button Margin="10">About</Button>
+  </StackPanel>
 </Window>

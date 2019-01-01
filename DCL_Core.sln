@@ -1,11 +1,10 @@
-﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.136
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DCL_Core", "DCL_Core\DCL_Core.csproj", "{AD04B7FB-F785-439B-B137-9EF85621C6BF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DCL_GUI", "DCL_GUI\DCL_GUI.csproj", "{66F61650-822D-4B3B-963D-F32E8F2BAEB6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DCL_GUI", "DCL_GUI\DCL_GUI.csproj", "{A3810D98-C8D3-4ABD-826C-14B4B325A03D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,15 +16,18 @@ Global
 		{AD04B7FB-F785-439B-B137-9EF85621C6BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AD04B7FB-F785-439B-B137-9EF85621C6BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AD04B7FB-F785-439B-B137-9EF85621C6BF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{66F61650-822D-4B3B-963D-F32E8F2BAEB6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{66F61650-822D-4B3B-963D-F32E8F2BAEB6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{66F61650-822D-4B3B-963D-F32E8F2BAEB6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{66F61650-822D-4B3B-963D-F32E8F2BAEB6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A3810D98-C8D3-4ABD-826C-14B4B325A03D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A3810D98-C8D3-4ABD-826C-14B4B325A03D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A3810D98-C8D3-4ABD-826C-14B4B325A03D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A3810D98-C8D3-4ABD-826C-14B4B325A03D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3789988C-BBAD-4A1D-B802-FE9096CE4D34}
+	EndGlobalSection
+	GlobalSection(AvalonStudioProperties) = preSolution
+		StartupItem = {FA964EF6-492F-4646-B772-583DC1C9CA60}
 	EndGlobalSection
 EndGlobal
