@@ -8,13 +8,13 @@ namespace DCL_Core.Contracts
     public class Keys
     {
         [DataMember]
-        public byte[] PrivateSpendKey { get; set; }
+        public string PrivateKey { get; set; }
         [DataMember]
-        public byte[] PrivateViewKey { get; set; }
+        public byte[] PrivateKeyByte { get; set; }
         [DataMember]
-        public byte[] PublicSpendKey { get; set; }
+        public string PublicKey { get; set; }
         [DataMember]
-        public byte[] PublicViewKey { get; set; }
+        public byte[] PublicKeyByte { get; set; }
         [DataMember]
         public byte[] NetworkByte { get; set; }
         [DataMember]

@@ -1,66 +1,55 @@
-﻿using System.Security.Cryptography;
-using System.Text;
+﻿using DCL_Core.Contracts;
+using Org.BouncyCastle.Asn1.Sec;
+using Org.BouncyCastle.Crypto.Parameters;
 using System;
-using Org.BouncyCastle.Crypto.Digests;
-using DCL_Core.Contracts;
-using DCL_Core.Cryptography;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
-
-/*OK, as far as I figured out now we need to do the following:
-- Step 1: Generate private spend key (SHA 256 hash of passcode + username)
-- Step 2: Generate private view key (SHA 256 hash of passcode + hash of private spend key)
-- Step 3: Generate public spend key (ed25519 scalarmult of private spend key)
-- Step 4: Generate public view key (ed25519 scalarmult of private view key)
-- Step 5: Add network byte to public spend and view key
-- Step 6: this 65 byte needs to be hashed with keccak 256 
-- Step 7: Add first 4 bytes from hashed value to the 67 bytes (at the end) 
-- Step 8: Convert the 71 bytes to Base58
-- Step 9: Maybe we'd like to have one "superkey" which unlocks private spend and view key...who knows
-- Known bug: prefix
-*/
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Security.Cryptography;
+using System.Text;
+using DCL_Core;
+using DCL_Core.CORE;
 
 namespace DCL_Core.Wallet
 {
     public class WalletManager
     {
         //Make sure the Data can not be read directly as public member
-        private WalletData  Data   { get; set; }
+        private WalletData Data { get; set; }
 
         public bool isLoggedIn()
         {
-            return Data == null?false:true;
+            return Data == null ? false : true;
         }
-        public String PublicAddress()
+        public string PublicAddress()
         {
             return Data.PublicAddress;
         }
-        public Double Balance()
+        public double Balance()
         {
             return Data.Balance;
         }
         public void LogOut()
         {
             //Only do something if we're actually logged in
-            if(Data != null)
+            if (Data != null)
             {
                 WriteWalletData(Data, Data.WalletName);
                 Data = null;    //Remove data
             }
         }
 
-        public bool Login(LoginRequest    _loginRequest)
+        public bool Login(LoginRequest _loginRequest)
         {
             WalletData ret = null;
 
-            if( _loginRequest.CreateNewWallet               && 
-                _loginRequest.PassCode          != ""       && 
-                _loginRequest.WalletName        != ""       &&
+            if (_loginRequest.CreateNewWallet &&
+                _loginRequest.PassCode != "" &&
+                _loginRequest.WalletName != "" &&
                 !FileBinIO.Exists(_loginRequest.WalletName))
             {
-                ret =  GenerateWallet(_loginRequest.PassCode, _loginRequest.WalletName);
+                ret = GenerateWallet(_loginRequest.PassCode, _loginRequest.WalletName);
             }
-            else if(_loginRequest.CreateNewWallet)
+            else if (_loginRequest.CreateNewWallet)
             {
                 Console.WriteLine("Missing wallet name or password, or password requirements do not match, or wallet already exists");
                 return false;    //Todo: add exception error
@@ -72,10 +61,10 @@ namespace DCL_Core.Wallet
 
             Data = ret;
 
-            return Data == null?false:true;
+            return Data == null ? false : true;
         }
 
-        private WalletData  LoginWallet(LoginRequest    _loginRequest)
+        private WalletData LoginWallet(LoginRequest _loginRequest)
         {
             WalletData ret;
 
@@ -89,9 +78,11 @@ namespace DCL_Core.Wallet
             }
 
             if (ret == null)
+            {
                 return null;
+            }
 
-            if(!PasswordManager.CheckPass(_loginRequest.PassCode, Convert.ToBase64String(ret.PassCode)))
+            if (!PasswordManager.CheckPass(_loginRequest.PassCode, Convert.ToBase64String(ret.PassCode)))
             {
                 Console.WriteLine("Wrong passcode entered!");
                 return null;
@@ -141,118 +132,42 @@ namespace DCL_Core.Wallet
         private WalletData makeWallet(string _passCode, string _walletName)
         {
             WalletData newWallet = new WalletData();
-            Keys        WalletKeys = new Keys();
-
-            WalletKeys.PrivateSpendKey  = GeneratePrivateSpendKey(_passCode, _walletName);                                              //Done	
-            WalletKeys.PrivateViewKey   = GeneratePrivateViewKey(_passCode, WalletKeys.PrivateSpendKey);                                //Done
-            WalletKeys.PublicSpendKey   = GeneratePubSpendKey(WalletKeys.PrivateSpendKey);                                              //Done
-            WalletKeys.PublicViewKey    = GeneratePubViewKey(WalletKeys.PrivateViewKey);                                                //Done
-            WalletKeys.HashedKey        = HashKeccak256(WalletKeys.PublicSpendKey, WalletKeys.PublicViewKey);                           //Done
-
-            newWallet.PublicAddress     = ConvertToPubAddressChunked(WalletKeys.HashedKey);                                             //Done
-            newWallet.PassCode          = PasswordManager.GenerateSaltedOutputBytes(_passCode);
-            newWallet.WalletName        = _walletName;
-            newWallet.KeySet            = WalletKeys;
+            Keys WalletKeys = new Keys
+            {
+                PrivateKey = GeneratePrivateKey(_passCode, _walletName) 	
+            };
+            WalletKeys.PrivateKeyByte   = Encoding.ASCII.GetBytes(WalletKeys.PrivateKey);
+            WalletKeys.PublicKey        = GeneratePublicKey(WalletKeys.PrivateKeyByte); 
+            WalletKeys.PublicKeyByte    = Encoding.ASCII.GetBytes(WalletKeys.PublicKey);
+            newWallet.PublicAddress     = WalletKeys.PublicKey;
+            newWallet.PassCode = PasswordManager.GenerateSaltedOutputBytes(_passCode);
+            newWallet.WalletName = _walletName;
+            newWallet.KeySet = WalletKeys;
 
             return newWallet;   //Return the public address, the rest we have to store somewhere safe...
         }
 
-        public static byte[] GeneratePrivateSpendKey(string _passCode, string _userId)
+        
+    public static string GeneratePrivateKey(string _passCode, string _userId)
         {
-            byte[] bytes = Encoding.Unicode.GetBytes(_passCode + _userId);
+            byte[] bytes = Encoding.Unicode.GetBytes(_passCode + _userId + Convert.ToString(DateTime.Now.Ticks));
             SHA256Managed hashstring = new SHA256Managed();
             byte[] hash = hashstring.ComputeHash(bytes);
-            return hash;
+            return ByteArrayToString(hash);
         }
-
-        public static byte[] GeneratePrivateViewKey(string _passCode, byte[] privateSpendKey)
+        public static string GeneratePublicKey(byte[] privateKeyByte)
         {
-            byte[] passCodeByte = Encoding.Unicode.GetBytes(_passCode);
-            SHA256Managed hashstring = new SHA256Managed();
-            byte[] hash = hashstring.ComputeHash(passCodeByte);
+            int privateKeyInteger = BitConverter.ToInt32(privateKeyByte,0);
+            var curve = SecNamedCurves.GetByName("secp256k1");
+            var domain = new ECDomainParameters(curve.Curve, curve.G, curve.N, curve.H);
+            var d = new Org.BouncyCastle.Math.BigInteger(privateKeyInteger.ToString());
+            var q = domain.G.Multiply(d);
+            var publicKey = new ECPublicKeyParameters(q, domain);
 
-            byte[] ret = new byte[32];      //32 byte result (4 bytes pass + 28 bytes spendkey)
+            return Base58Encoding.Encode(publicKey.Q.GetEncoded());
 
-            Array.Copy(passCodeByte, 0, ret, 0, 4);
-            Array.Copy(privateSpendKey, 0, ret, 3, 28);
-
-            return ret;
-        }
-        public static byte[] GeneratePubSpendKey(byte[] privateSpendKey)
-        {
-            //RNGCryptoServiceProvider.Create().GetBytes(privateSpendKey);
-            byte[] publicKey = Ed25519.PublicKey(privateSpendKey);
-
-            return publicKey;
-        }
-        public static byte[] GeneratePubViewKey(byte[] privateViewKey)
-        {
-            //RNGCryptoServiceProvider.Create().GetBytes(privateViewKey);
-            byte[] publicKey = Ed25519.PublicKey(privateViewKey);
-
-            return publicKey;
         }
 
-        public static byte[] HashKeccak256(byte[] publicSpendKey, byte[] publicViewKey)
-        {
-            //We need 69 bytes: 65 from the public spend key, public view key and networkbyte + 4 from the hashing of keccak
-            byte[] origByteSet = new byte[66];
-            byte[] hashFirst4 = new byte[4];
-            byte[] ret = new byte[70];
-            System.Buffer.BlockCopy(publicSpendKey, 0, origByteSet, 0, publicSpendKey.Length);
-            System.Buffer.BlockCopy(publicViewKey, 0, origByteSet, publicSpendKey.Length, publicViewKey.Length);
-
-            byte[] resultHashedKec256 = WalletManager.Keccak256Helper(origByteSet);    //Run keccak
-
-            Array.Copy(resultHashedKec256, 0, hashFirst4, 0, 4); //Copy the first 4 bytes from the hash
-
-            System.Buffer.BlockCopy(origByteSet, 0, ret, 0, origByteSet.Length);  //Add the 4 bytes to complete the 69 bytes array
-            System.Buffer.BlockCopy(hashFirst4, 0, ret, publicSpendKey.Length + publicViewKey.Length, hashFirst4.Length);  //Add the 4 bytes to complete the 69 bytes array
-
-            return ret; //Return the hashed array
-        }
-
-        public static string ConvertToPubAddressChunked(byte[] array)
-        {
-            int arrayLength = array.Length;
-            string ret = "";
-            int numOfCopyInt;
-            byte[] subArray = new byte[8];  //Max 8 bytes
-
-            for (int I = 0; I < arrayLength; I += 8)
-            {
-                numOfCopyInt = arrayLength - I > 7 ? 8 : arrayLength - I;
-                subArray = new byte[numOfCopyInt];
-                Array.Copy(array, I, subArray, 0, numOfCopyInt);
-                ret += WalletManager.ConvertToPubAddress(subArray);
-            }
-
-            return ret;
-        }
-
-        public static string ConvertToPubAddress(byte[] array)
-        {
-            const string ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
-            string retString = string.Empty;
-            System.Numerics.BigInteger encodeSize = ALPHABET.Length;
-            System.Numerics.BigInteger arrayToInt = 0;
-            for (int i = 0; i < array.Length; ++i)
-            {
-                arrayToInt = arrayToInt * 256 + array[i];
-            }
-            while (arrayToInt > 0)
-            {
-                int rem = (int)(arrayToInt % encodeSize);
-                arrayToInt /= encodeSize;
-                retString = ALPHABET[rem] + retString;
-            }
-            for (int i = 0; i < array.Length && array[i] == 0; ++i)
-                retString = ALPHABET[0] + retString;
-
-            return retString;
-        }
-
-        //Helping method(s)
         public static string ByteArrayToString(byte[] ba)
         {
             StringBuilder hex = new StringBuilder(ba.Length * 2);
@@ -260,38 +175,6 @@ namespace DCL_Core.Wallet
                 hex.AppendFormat("{0:x2}", b);
             Console.WriteLine(hex.ToString());
             return hex.ToString();
-        }
-
-        public static byte[] Keccak256Helper(byte[] _input)
-        {
-            KeccakDigest Kec256 = new KeccakDigest(256);
-            Kec256.Reset();
-            byte[] resultHashedKec256 = new byte[32];
-            Kec256.BlockUpdate(_input, 0, _input.Length);
-            Kec256.DoFinal(resultHashedKec256, 0);
-
-            return resultHashedKec256;
-        }
-
-        public static byte[] StringToByteArray(string hex)
-        {
-            if (hex.Length % 2 == 1)
-                throw new Exception("The binary key cannot have an odd number of digits");
-
-            byte[] arr = new byte[hex.Length >> 1];
-
-            for (int i = 0; i < hex.Length >> 1; ++i)
-            {
-                arr[i] = (byte)((GetHexVal(hex[i << 1]) << 4) + (GetHexVal(hex[(i << 1) + 1])));
-            }
-
-            return arr;
-        }
-        public static int GetHexVal(char hex)
-        {
-            int val = (int)hex;
-
-            return val - (val < 58 ? 48 : (val < 97 ? 55 : 87));
         }
     }
 }

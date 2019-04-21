@@ -10,11 +10,11 @@ using DCL_Core.P2P;
 namespace DCL_Core.CORE
 {
     public class DaemonCore
-    {
-        public HandleLiteDB         Database { get; set; }
-        public CompletedTransaction CompletedTrans;
-        public P2PClient            P2PClient { get; set; }
-        public P2PServer            P2PServer { get; set; }
+    { 
+        public  HandleLiteDB         Database { get; set; }
+        public  CompletedTransaction CompletedTrans;
+        public  P2PClient            P2PClient { get; set; }
+        public  P2PServer            P2PServer { get; set; }
 
         public DaemonCore New()
         {
@@ -48,7 +48,8 @@ namespace DCL_Core.CORE
             P2PClient.Connect($"ws://127.0.0.1:{_port}/DCL_CORE");
         }
 
-        public void TransferShares(     string _fromAddress, 
+        public void TransferShares(     string _fromAddress,
+                                        string _privateKey,
                                         string _toAddress, 
                                         double _amount)
         {
@@ -59,7 +60,7 @@ namespace DCL_Core.CORE
             if (PostingShares != null)
             {
                 //Now start building the transaction
-                CompletedTrans = BuildTransaction(PostingShares, _fromAddress, _toAddress, _amount);
+                CompletedTrans = BuildTransaction(PostingShares, _fromAddress, _privateKey, _toAddress, _amount);
 
                 if(CompletedTrans != null)  //If the transaction has been completed, broadcast it
                 {
@@ -67,9 +68,9 @@ namespace DCL_Core.CORE
                 }
             }
         }
-
         public CompletedTransaction     BuildTransaction(   IList<Share> _SendingFromShares,
                                                             string _fromAddress,
+                                                            string _privateKey,
                                                             string _toAddress,
                                                             double _amount)
         {
@@ -130,7 +131,8 @@ namespace DCL_Core.CORE
                             ShareId         = SpendingShare.ShareId
                         };
 
-                        postSpendTransaction.MD5Hash = MD5Hash.GenerateKey(postSpendTransaction);
+                        postSpendTransaction.MD5Hash    = MD5Hash.GenerateKey(postSpendTransaction);
+                        postSpendTransaction.Signature = SignManager.GetSignature(_privateKey, postSpendTransaction.MD5Hash);
 
                         Database.InsertSpendShare(postSpendTransaction);
 
@@ -203,7 +205,6 @@ namespace DCL_Core.CORE
 
             return results.ToList();
         }
-        //public IList<Share> CollectActiveShares(string _fromAddress, double _amountTransaction)
         public IList<Share> CollectActiveShares(string _fromAddress, double _amountTransaction)
         {
             IList<Share>        Shares;

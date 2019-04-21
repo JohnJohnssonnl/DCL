@@ -17,5 +17,7 @@ namespace DCL_Core.Contracts
         public double   Amount          { get; set; }
         [DataMember]
         public string   MD5Hash         { get; set; }
+        [DataMember]
+        public string   Signature       { get; set; }
     }
 }
