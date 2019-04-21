@@ -12,7 +12,7 @@ This imposes 3 problems:
 This project is my own search for a faster, more "green" alternative (even though it's just a hobby for me, so don't expect professional plug and play solutions from this). Let's rethink how an actual decentralized solution without blocks and without silly guessing games will look like and how it can still be secure enough.
 
 If you want to give it a go, here the build instructions: 
-- Install Visual Studio 2015/2017 Community<BR>
+- Install Visual Studio 2015/2017/2019 Community<BR>
 - Open project .SLN<BR>
 - Change the code if you want to
 - Build :-P<BR>
